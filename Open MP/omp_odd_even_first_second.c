@@ -15,20 +15,22 @@ void Get_args(int argc, char* argv[], int* n_p, char* g_i_p);
 void Generate_list(int a[], int n);
 void Print_list(int a[], int n, char* title);
 void Read_list(int a[], int n);
+void Read_Fichero(int a[], int n);
 void Odd_even_First(int a[], int n);
 void Odd_even_Second(int a[], int n);
 
 /*-----------------------------------------------------------------*/
 int main(int argc, char* argv[]) {
-   int  n;
+   int n;
    char g_i;
    int* a;
-   double t0, t1 , t2, t3;
+   double t0, t1 ;
+   double t2, t3;
 
    Get_args(argc, argv, &n, &g_i);
    a = malloc(n*sizeof(int));
    if (g_i == 'g') {
-      Generate_list(a, n);
+      Read_Fichero(a, n);
 #     ifdef DEBUG
       Print_list(a, n, "Before sort");
 #     endif
@@ -36,7 +38,6 @@ int main(int argc, char* argv[]) {
       Read_list(a, n);
    }
 
-  /* Comparación de tiempo entre First y Second Odd-Even Sort*/
    t0 = omp_get_wtime();
    Odd_even_First(a, n);
    t1 = omp_get_wtime();
@@ -49,14 +50,17 @@ int main(int argc, char* argv[]) {
    Print_list(a, n, "After sort");
 #  endif
    
-   printf("Odd_even_First Elapsed time = %e seconds\n", t1 - t0);
-   printf("Odd_even_Second Elapsed time = %e seconds\n", t3- t2);
-   free(a);
+   printf("First %5lf seconds\n", t1 - t0);
+   printf("Second %5lf seconds\n", t3 - t2);
+   //free(a);
    return 0;
 }  /* main */
 
+/*-----------------------------------------------------------------
+ * Function:  Usage
+ * Purpose:   Summary of how to run program
+ */
 void Usage(char* prog_name) {
-  
    fprintf(stderr, "usage:   %s <thread count> <n> <g|i>\n", prog_name);
    fprintf(stderr, "   n:   number of elements in list\n");
    fprintf(stderr, "  'g':  generate list using a random number generator\n");
@@ -64,6 +68,12 @@ void Usage(char* prog_name) {
 }  /* Usage */
 
 
+/*-----------------------------------------------------------------
+ * Function:  Get_args
+ * Purpose:   Get and check command line arguments
+ * In args:   argc, argv
+ * Out args:  n_p, g_i_p
+ */
 void Get_args(int argc, char* argv[], int* n_p, char* g_i_p) {
    if (argc != 4 ) {
       Usage(argv[0]);
@@ -79,6 +89,31 @@ void Get_args(int argc, char* argv[], int* n_p, char* g_i_p) {
    }
 }  /* Get_args */
 
+void Read_Fichero(int a[], int n) {
+   int num;
+   int i = 0;
+    FILE *f;
+    f = fopen("datos.txt", "r");
+    while( fscanf(f, "%i", &num) == 1){
+      a[i] = num;
+      //printf("%i\n", a[i]);
+      i = i + 1;
+    }
+    if(feof(f))    {
+        printf("Lectura correcta de elementos\n");
+    }
+    else    {
+        printf("Error leyendo datos\n");
+    }
+    fclose(f);
+}
+
+/*-----------------------------------------------------------------
+ * Function:  Generate_list
+ * Purpose:   Use random number generator to generate list elements
+ * In args:   n
+ * Out args:  a
+ */
 void Generate_list(int a[], int n) {
    int i;
    srand(1);
@@ -86,6 +121,11 @@ void Generate_list(int a[], int n) {
       a[i] = rand() % RMAX;
 }  /* Generate_list */
 
+/*-----------------------------------------------------------------
+ * Function:  Print_list
+ * Purpose:   Print the elements in the list
+ * In args:   a, n
+ */
 void Print_list(int a[], int n, char* title) {
    int i;
 
@@ -95,6 +135,12 @@ void Print_list(int a[], int n, char* title) {
    printf("\n\n");
 }  /* Print_list */
 
+/*-----------------------------------------------------------------
+ * Function:  Read_list
+ * Purpose:   Read elements of list from stdin
+ * In args:   n
+ * Out args:  a
+ */
 void Read_list(int a[], int n) {
    int i;
 
@@ -103,7 +149,13 @@ void Read_list(int a[], int n) {
       scanf("%d", &a[i]);
 }  /* Read_list */
 
-/* ------------  First Odd Even Sort ------ */
+/*-----------------------------------------------------------------
+ * Function:     Odd_even
+ * Purpose:      Sort list using odd-even transposition sort
+ * In args:      n
+ * In/out args:  a
+ */
+
 void Odd_even_First(int a[], int n) {
    int phase, i, tmp;
 #  ifdef DEBUG
@@ -137,9 +189,6 @@ void Odd_even_First(int a[], int n) {
 #     endif
    }
 }
-
-
-/* ------------  Second Odd Even Sort ------ */
 void Odd_even_Second(int a[], int n) {
    int phase, i, tmp;
 
